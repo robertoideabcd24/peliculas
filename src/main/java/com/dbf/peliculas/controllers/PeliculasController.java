@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.dbf.peliculas.entities.Actor;
 import com.dbf.peliculas.entities.Pelicula;
@@ -73,7 +74,7 @@ public class PeliculasController {
 		model.addAttribute("generos", generoService.findAll());
 		model.addAttribute("actores", actorService.findAll());
 		model.addAttribute("titulo", "Editar Pelicula");
-		model.addAttribute("ids", ids);
+		//model.addAttribute("ids", ids);
 		return "pelicula";
 	}
 
@@ -138,12 +139,32 @@ public class PeliculasController {
 	}
 	
 	@GetMapping({ "/listado" })
-	public String listado(Model model) {
+	public String listado(Model model, 
+			@RequestParam(required = false) String msj, 
+			@RequestParam(required = false) String tipoMsj) {
 		
 		model.addAttribute("titulo", "Listado de Películas");
 		model.addAttribute("peliculas", service.findAll());
+		
+		if(!"".equals(tipoMsj) && !"".equals(msj)) {
+			model.addAttribute("msj", msj);
+			model.addAttribute("tipoMsj", tipoMsj);
+		}
 
 		return "listado";
 	}
+	
+	@GetMapping("/pelicula/{id}/delete")
+	public String eliminar(@PathVariable(name = "id") Long id, 
+			Model model, 
+			RedirectAttributes redirectAtt) {
+		
+		service.delete(id);
+		redirectAtt.addAttribute("msj", "La película fue eliminada correctamente");
+		redirectAtt.addAttribute("tipoMsj", "success");
+		
+		return "redirect:/listado";
+	}
+
 
 }
